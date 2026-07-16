@@ -1,100 +1,352 @@
 export interface QuizOption {
-  id: string
-  label: string
-  icon?: string
+  id: string;
+  label: string;
+  icon?: string;
 }
 
 export interface QuizQuestion {
-  id: string
-  question: string
-  hint: string
-  options: QuizOption[]
+  id: string;
+  question: string;
+  hint: string;
+  options: QuizOption[];
+}
+
+export interface QuizAnswers {
+  etapa?: string;
+  dificuldade?: string;
+  ["nota-atual"]?: string;
+  ["area-medo"]?: string;
+  ["tempo-estudo"]?: string;
+  objetivo?: string;
 }
 
 export const quizQuestions: QuizQuestion[] = [
-  {
-    id: 'etapa',
-    question: 'Você já fez o ENEM antes?',
-    hint: 'Isso ajuda a calibrar seu ponto de partida',
-    options: [
-      { id: 'nunca', label: 'Nunca fiz', icon: '🆕' },
-      { id: 'uma-vez', label: 'Fiz uma vez', icon: '📝' },
-      { id: 'varias', label: 'Já fiz mais de uma vez', icon: '🔁' },
-    ],
-  },
-  {
-    id: 'dificuldade',
-    question: 'Qual sua maior dificuldade na redação?',
-    hint: 'Não existe resposta errada aqui',
-    options: [
-      { id: 'introducao', label: 'Começar o texto', icon: '✍️' },
-      { id: 'argumentacao', label: 'Desenvolver os argumentos', icon: '🧠' },
-      { id: 'coesao', label: 'Coesão e coerência', icon: '🔗' },
-      { id: 'proposta', label: 'Proposta de intervenção', icon: '💡' },
-      { id: 'nao-sei', label: 'Não sei ao certo', icon: '🤔' },
-    ],
-  },
-  {
-    id: 'nota-atual',
-    question: 'Qual sua última nota de redação (ou estimativa)?',
-    hint: 'Seja sincero — isso é só pra calibrar seu plano',
-    options: [
-      { id: 'ate-400', label: 'Até 400' },
-      { id: '400-600', label: '400 a 600' },
-      { id: '600-800', label: '600 a 800' },
-      { id: '800+', label: 'Acima de 800' },
-      { id: 'nunca-fiz', label: 'Nunca escrevi uma redação nota real' },
-    ],
-  },
-  {
-    id: 'area-medo',
-    question: 'Qual área te dá mais medo na prova?',
-    hint: 'Vamos usar isso pra montar seu foco de estudo',
-    options: [
-      { id: 'linguagens', label: 'Linguagens', icon: '📖' },
-      { id: 'humanas', label: 'Ciências Humanas', icon: '🌍' },
-      { id: 'natureza', label: 'Ciências da Natureza', icon: '🔬' },
-      { id: 'matematica', label: 'Matemática', icon: '📐' },
-      { id: 'redacao', label: 'Redação', icon: '✏️' },
-    ],
-  },
-  {
-    id: 'tempo-estudo',
-    question: 'Quanto tempo por semana você dedica aos estudos?',
-    hint: 'Vamos adaptar o plano ao seu tempo real',
-    options: [
-      { id: 'pouco', label: 'Menos de 3 horas' },
-      { id: 'medio', label: '3 a 8 horas' },
-      { id: 'bom', label: '8 a 15 horas' },
-      { id: 'muito', label: 'Mais de 15 horas' },
-    ],
-  },
-  {
-    id: 'objetivo',
-    question: 'Qual seu maior objetivo agora?',
-    hint: 'Última pergunta! Isso define seu resultado',
-    options: [
-      { id: 'nota-1000', label: 'Tirar nota 1000 na redação', icon: '🏆' },
-      { id: 'passar', label: 'Passar no curso que eu quero', icon: '🎯' },
-      { id: 'melhorar', label: 'Melhorar minha nota atual', icon: '📈' },
-      { id: 'organizar', label: 'Organizar minha rotina de estudos', icon: '🗓️' },
-    ],
-  },
-]
 
-export const dificuldadeLabels: Record<string, string> = {
-  introducao: 'Começar o texto', argumentacao: 'Argumentação',
-  coesao: 'Coesão e coerência', proposta: 'Proposta de intervenção', 'nao-sei': 'Não sei ao certo',
-}
-export const notaLabels: Record<string, string> = {
-  'ate-400': 'Até 400', '400-600': '400 a 600', '600-800': '600 a 800',
-  '800+': 'Acima de 800', 'nunca-fiz': 'Nunca escrevi',
-}
-export const areaLabels: Record<string, string> = {
-  linguagens: 'Linguagens', humanas: 'Humanas', natureza: 'Natureza',
-  matematica: 'Matemática', redacao: 'Redação',
-}
-export const objetivoLabels: Record<string, string> = {
-  'nota-1000': 'Nota 1000', passar: 'Passar no curso',
-  melhorar: 'Melhorar a nota', organizar: 'Organizar rotina',
+  {
+    id: "etapa",
+
+    question:
+      "Qual é o seu momento atual com o ENEM?",
+
+    hint:
+      "Vamos identificar seu ponto de partida para montar seu plano",
+
+    options: [
+      {
+        id: "primeira",
+        label: "Vou fazer o ENEM pela primeira vez",
+        icon: "🆕",
+      },
+      {
+        id: "uma-vez",
+        label: "Já fiz uma vez e quero melhorar",
+        icon: "📈",
+      },
+      {
+        id: "varias",
+        label: "Já tentei algumas vezes",
+        icon: "🔁",
+      },
+    ],
+  },
+
+
+
+  {
+    id: "dificuldade",
+
+    question:
+      "Qual sua maior dificuldade na redação?",
+
+    hint:
+      "Isso mostra onde você pode ganhar mais pontos",
+
+    options: [
+
+      {
+        id: "introducao",
+        label: "Começar a redação",
+        icon: "✍️",
+      },
+
+      {
+        id: "argumentacao",
+        label: "Criar bons argumentos",
+        icon: "🧠",
+      },
+
+      {
+        id: "coesao",
+        label: "Organizar minhas ideias",
+        icon: "🔗",
+      },
+
+      {
+        id: "proposta",
+        label: "Fazer uma proposta forte",
+        icon: "💡",
+      },
+
+      {
+        id: "nao-sei",
+        label: "Não sei exatamente",
+        icon: "🤔",
+      },
+
+    ],
+  },
+
+
+
+  {
+    id: "nota-atual",
+
+    question:
+      "Qual sua nota atual ou estimativa na redação?",
+
+    hint:
+      "Assim conseguimos calcular seu potencial de evolução",
+
+    options: [
+
+      {
+        id: "ate-400",
+        label: "Menos de 400 pontos",
+      },
+
+      {
+        id: "400-600",
+        label: "Entre 400 e 600 pontos",
+      },
+
+      {
+        id: "600-800",
+        label: "Entre 600 e 800 pontos",
+      },
+
+      {
+        id: "800+",
+        label: "Acima de 800 pontos",
+      },
+
+      {
+        id: "nunca-fiz",
+        label: "Nunca fiz uma redação avaliada",
+      },
+
+    ],
+  },
+
+
+
+  {
+    id: "area-medo",
+
+    question:
+      "Qual parte do ENEM mais preocupa você?",
+
+    hint:
+      "Vamos direcionar seu plano para sua maior dificuldade",
+
+    options: [
+
+      {
+        id: "linguagens",
+        label: "Linguagens",
+        icon: "📖",
+      },
+
+      {
+        id: "humanas",
+        label: "Ciências Humanas",
+        icon: "🌎",
+      },
+
+      {
+        id: "natureza",
+        label: "Ciências da Natureza",
+        icon: "🔬",
+      },
+
+      {
+        id: "matematica",
+        label: "Matemática",
+        icon: "📐",
+      },
+
+      {
+        id: "redacao",
+        label: "Redação",
+        icon: "✏️",
+      },
+
+    ],
+  },
+
+
+
+  {
+    id: "tempo-estudo",
+
+    question:
+      "Quanto tempo você consegue estudar por semana?",
+
+    hint:
+      "Seu plano será adaptado à sua rotina real",
+
+    options: [
+
+      {
+        id: "pouco",
+        label: "Menos de 3 horas",
+      },
+
+      {
+        id: "medio",
+        label: "De 3 a 8 horas",
+      },
+
+      {
+        id: "bom",
+        label: "De 8 a 15 horas",
+      },
+
+      {
+        id: "muito",
+        label: "Mais de 15 horas",
+      },
+
+    ],
+  },
+
+
+
+  {
+    id: "objetivo",
+
+    question:
+      "Qual seu principal objetivo com o ENEM?",
+
+    hint:
+      "Última pergunta! Vamos definir seu foco",
+
+    options: [
+
+      {
+        id: "nota-1000",
+        label: "Buscar nota máxima na redação",
+        icon: "🏆",
+      },
+
+      {
+        id: "passar",
+        label: "Entrar no curso que desejo",
+        icon: "🎯",
+      },
+
+      {
+        id: "melhorar",
+        label: "Aumentar minha nota",
+        icon: "📈",
+      },
+
+      {
+        id: "organizar",
+        label: "Criar uma rotina de estudos",
+        icon: "🗓️",
+      },
+
+    ],
+  },
+
+];
+
+
+
+export const dificuldadeLabels: Record<string,string> = {
+
+  introducao:
+    "Começar a redação",
+
+  argumentacao:
+    "Construção dos argumentos",
+
+  coesao:
+    "Organização das ideias",
+
+  proposta:
+    "Proposta de intervenção",
+
+  "nao-sei":
+    "Identificar dificuldade",
+
+};
+
+
+
+export const notaLabels: Record<string,string> = {
+
+  "ate-400":
+    "Menos de 400",
+
+  "400-600":
+    "400 a 600",
+
+  "600-800":
+    "600 a 800",
+
+  "800+":
+    "Acima de 800",
+
+  "nunca-fiz":
+    "Sem nota anterior",
+
+};
+
+
+
+export const areaLabels: Record<string,string> = {
+
+  linguagens:
+    "Linguagens",
+
+  humanas:
+    "Ciências Humanas",
+
+  natureza:
+    "Ciências da Natureza",
+
+  matematica:
+    "Matemática",
+
+  redacao:
+    "Redação",
+
+};
+
+
+
+export const objetivoLabels: Record<string,string> = {
+
+  "nota-1000":
+    "Nota máxima",
+
+  passar:
+    "Aprovação no curso",
+
+  melhorar:
+    "Melhorar a nota",
+
+  organizar:
+    "Organizar rotina",
+
+};
+
+export interface QuizAnswers {
+  etapa?: string;
+  dificuldade?: string;
+  ["nota-atual"]?: string;
+  ["area-medo"]?: string;
+  ["tempo-estudo"]?: string;
+  objetivo?: string;
 }

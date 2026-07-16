@@ -13,26 +13,38 @@ npm run dev
 Acesse `http://localhost:5173` para o quiz, ou `http://localhost:5173/acesso`
 para ir direto ao painel.
 
-## Estrutura
-
-```
 src/
 ├── components/
-│   ├── QuizStep.tsx        # Tela de pergunta do quiz
-│   ├── ProgressBar.tsx
-│   ├── DiagnosisLoading.tsx
-│   ├── Result.tsx           # Tela de resultado, leva para /acesso
-│   ├── BottomNav.tsx        # Navegação inferior do painel
-│   ├── ProductCard.tsx      # Card de item grátis ou pago
-│   ├── PaywallModal.tsx     # Modal ao clicar em item pago
-│   └── Simulador.tsx        # Simulador cronometrado (funcional)
-├── pages/
-│   └── Acesso.tsx           # Painel principal /acesso
+│   ├── navigation/
+│   │   └── BottomNav.tsx        # Navegação inferior do painel /acesso
+│   ├── products/
+│   │   ├── PaywallModal.tsx     # Modal ao clicar em item pago
+│   │   └── ProductCard.tsx      # Card de item grátis ou pago
+│   ├── quiz/
+│   │   ├── DiagnosisLoading.tsx # Tela de carregamento do diagnóstico
+│   │   ├── ProgressBar.tsx      # Barra de progresso do quiz
+│   │   └── QuizStep.tsx         # Tela de pergunta do quiz
+│   ├── result/
+│   │   ├── LeadCapture.tsx      # Captura de lead (e-mail/dados) antes do resultado
+│   │   └── Result.tsx           # Tela de resultado, direciona para /acesso
+│   └── tools/
+│       └── Simulador.tsx        # Simulador cronometrado (funcional)
 ├── data/
-│   ├── quiz.ts               # Perguntas do quiz
-│   └── products.ts           # Itens grátis + 5 produtos pagos
-└── App.tsx                   # Roteamento simples (quiz vs /acesso)
-```
+│   ├── products.ts              # Itens grátis + produtos pagos
+│   └── quiz.ts                  # Perguntas do quiz
+├── hooks/
+│   └── useLocalStorage.ts       # Hook customizado para persistência de dados
+├── pages/
+│   ├── Acesso.tsx               # Painel principal (/acesso)
+│   └── Quiz.tsx                 # Página que envelopa o fluxo do quiz (novidade!)
+├── services/
+│   ├── firebase.ts              # Configuração e inicialização do Firebase (novidade!)
+│   ├── leadService.ts           # Integração/envio de leads
+│   └── storageService.ts        # Gerenciamento de persistência de dados (ajustado para minúsculo)
+├── App.tsx                      # Roteamento entre / (Quiz.tsx) e /acesso (Acesso.tsx)
+├── index.css                    # Estilos globais (Tailwind/CSS)
+├── main.tsx                     # Ponto de entrada do React
+└── vite-env.d.ts                # Definições de tipos do Vite
 
 ## O que já funciona de verdade
 

@@ -1,4 +1,4 @@
-import { auth, db } from './firebase'
+import { auth, db } from "./firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -6,18 +6,34 @@ import {
   updatePassword,
   deleteUser,
   fetchSignInMethodsForEmail,
-} from 'firebase/auth'
-import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
-import type { QuizAnswers } from '../data/quiz'
+} from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  deleteDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import type { QuizAnswers } from "../data/quiz";
 
-/**
- * Verifica se um email já tem conta cadastrada.
- * Usa isso ANTES de tentar criar conta, para redirecionar
- * direto pro login em vez de dar erro.
- */
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+
+export async function getAllLeads() {
+  const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ uid: d.id, ...d.data() })) as Array<{
+    uid: string;
+    name?: string;
+    email?: string;
+    plano?: string;
+    senhaDefinida?: boolean;
+    quizAnswers?: Record<string, string> | null;
+    createdAt?: { toDate: () => Date };
+  }>;
+}
 export async function emailJaExiste(email: string): Promise<boolean> {
-  const methods = await fetchSignInMethodsForEmail(auth, email)
-  return methods.length > 0
+  const methods = await fetchSignInMethodsForEmail(auth, email);
+  return methods.length > 0;
 }
 
 /**
@@ -27,43 +43,51 @@ export async function emailJaExiste(email: string): Promise<boolean> {
  * depois, na aba "Perfil" de /acesso (ver definePassword).
  */
 function gerarSenhaTemporariaAleatoria(): string {
-  const array = new Uint8Array(24)
-  crypto.getRandomValues(array)
-  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
+  const array = new Uint8Array(24);
+  crypto.getRandomValues(array);
+  return Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export async function createAccount(
   name: string,
   email: string,
-  quizAnswers?: QuizAnswers
+  quizAnswers?: QuizAnswers,
 ) {
-  const senhaAleatoria = gerarSenhaTemporariaAleatoria()
+  const senhaAleatoria = gerarSenhaTemporariaAleatoria();
 
   // createUserWithEmailAndPassword já deixa o usuário autenticado
   // nesta sessão — é por isso que ele consegue definir a própria
   // senha depois em /acesso sem precisar logar de novo.
-  const userCredential = await createUserWithEmailAndPassword(auth, email, senhaAleatoria)
-  const user = userCredential.user
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    senhaAleatoria,
+  );
+  const user = userCredential.user;
 
-  await setDoc(doc(db, 'users', user.uid), {
+  await setDoc(doc(db, "users", user.uid), {
     uid: user.uid,
     name,
     email,
-    plano: 'nenhum',
+    plano: "nenhum",
     senhaDefinida: false,
     quizAnswers: quizAnswers ?? null,
     createdAt: serverTimestamp(),
-  })
+  });
 
-  return user
+  return user;
 }
 
 /**
  * Login para quem já tem conta.
  */
 export async function login(email: string, password: string) {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password)
-  return userCredential.user
+  const userCredential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
+  return userCredential.user;
 }
 
 /**
@@ -72,7 +96,7 @@ export async function login(email: string, password: string) {
  * /acesso e sumiu, ainda consegue recuperar o acesso por aqui.
  */
 export async function resetPassword(email: string) {
-  await sendPasswordResetEmail(auth, email)
+  await sendPasswordResetEmail(auth, email);
 }
 
 /**
@@ -82,16 +106,16 @@ export async function resetPassword(email: string) {
  */
 export async function definePassword(newPassword: string) {
   if (!auth.currentUser) {
-    throw new Error('Usuário não autenticado.')
+    throw new Error("Usuário não autenticado.");
   }
 
-  await updatePassword(auth.currentUser, newPassword)
+  await updatePassword(auth.currentUser, newPassword);
 
   await setDoc(
-    doc(db, 'users', auth.currentUser.uid),
+    doc(db, "users", auth.currentUser.uid),
     { senhaDefinida: true },
-    { merge: true }
-  )
+    { merge: true },
+  );
 }
 
 /**
@@ -99,9 +123,9 @@ export async function definePassword(newPassword: string) {
  * definiu senha, etc).
  */
 export async function getUserProfile() {
-  if (!auth.currentUser) return null
-  const snap = await getDoc(doc(db, 'users', auth.currentUser.uid))
-  return snap.exists() ? (snap.data() as Record<string, unknown>) : null
+  if (!auth.currentUser) return null;
+  const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+  return snap.exists() ? (snap.data() as Record<string, unknown>) : null;
 }
 
 /**
@@ -113,10 +137,10 @@ export async function getUserProfile() {
  */
 export async function deleteAccount() {
   if (!auth.currentUser) {
-    throw new Error('Usuário não autenticado.')
+    throw new Error("Usuário não autenticado.");
   }
 
-  const uid = auth.currentUser.uid
-  await deleteDoc(doc(db, 'users', uid))
-  await deleteUser(auth.currentUser)
+  const uid = auth.currentUser.uid;
+  await deleteDoc(doc(db, "users", uid));
+  await deleteUser(auth.currentUser);
 }

@@ -1,5 +1,13 @@
 import { db } from './firebase'
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+  query,
+  orderBy,
+  limit as fsLimit,
+} from 'firebase/firestore'
 
 export type EventName =
   | 'quiz_start'
@@ -9,6 +17,7 @@ export type EventName =
   | 'acesso_view'
   | 'product_click'
   | 'combo_click'
+  | 'checkout_click'
   | 'simulador_start'
   | 'simulador_complete'
   | 'login'
@@ -34,8 +43,13 @@ export async function trackEvent(event: EventName, meta?: Record<string, string 
   }
 }
 
-export async function getAllEvents(): Promise<TrackedEvent[]> {
-  const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'))
+/**
+ * Busca os eventos mais recentes, com um teto (`max`) pra não puxar
+ * a coleção inteira conforme ela cresce — sem isso, com muito
+ * volume essa query fica lenta e cara.
+ */
+export async function getAllEvents(max = 1000): Promise<TrackedEvent[]> {
+  const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'), fsLimit(max))
   const snap = await getDocs(q)
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as TrackedEvent))
 }

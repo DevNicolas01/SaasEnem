@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Um usuário é admin quando o próprio documento dele em /users tem
+    // isAdmin == true. Esse campo NUNCA é definido pelo app (veja as
+    // regras de /users abaixo) — só dá pra ativar manualmente pelo
+    // Console do Firebase, editando o documento do usuário à mão.
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true;
+    }
+
+    match /users/{userId} {
+      // Só o próprio dono (ou um admin) pode ler o documento.
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Criação só no momento do cadastro (createAccount), com os
+      // valores iniciais corretos — impede alguém criar um doc já
+      // com plano pago ou como admin.
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.senhaDefinida == false
+        && request.resource.data.plano == 'nenhum'
+        && !('isAdmin' in request.resource.data);
+
+      // Depois de criado, o próprio usuário só pode alterar nome e
+      // status de senha. "plano" e "isAdmin" nunca mudam por aqui —
+      // "plano" só deve mudar quando você conectar um backend seguro
+      // (webhook do gateway de pagamento), e "isAdmin" só pelo Console.
+      allow update: if isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['senhaDefinida', 'name'])
+        && request.resource.data.plano == resource.data.plano
+        && request.resource.data.get('isAdmin', false) == resource.data.get('isAdmin', false);
+
+      allow delete: if isOwner(userId);
+    }
+
+    match /events/{eventId} {
+      // Qualquer visitante pode REGISTRAR um evento (mesmo antes de
+      // logar — é assim que quiz_start funciona, por exemplo), mas só
+      // com o formato exato esperado pelo eventService.ts: nome de
+      // evento da lista permitida, e sem campos extras.
+      allow create: if request.resource.data.keys().hasOnly(['event', 'meta', 'createdAt'])
+        && request.resource.data.event in [
+             'quiz_start', 'quiz_complete', 'lead_captured', 'result_view',
+             'acesso_view', 'product_click', 'combo_click', 'checkout_click',
+             'simulador_start', 'simulador_complete', 'login', 'password_defined'
+           ];
+
+      // Só admin lê os eventos (painel /admin). Ninguém edita ou
+      // apaga — é um log, deve ser imutável.
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Bloqueia qualquer coisa fora de /users e /events por padrão.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { quizQuestions } from "../data/quiz";
+import { trackEvent } from "../services/eventService";
 
 import QuizStep from "../components/quiz/QuizStep";
 import DiagnosisLoading from "../components/quiz/DiagnosisLoading";
@@ -16,9 +18,15 @@ export interface QuizAnswers {
   objetivo?: string;
 }
 
-type Stage = "quiz" | "loading" | "result" | "lead";
+// Ordem do funil: primeiro captura o lead (email/senha), só depois
+// mostra o resultado completo. Isso "trava" o diagnóstico atrás do
+// cadastro em vez de entregar de graça antes — tende a converter
+// mais lead do que mostrar tudo e só pedir o email no final.
+type Stage = "quiz" | "loading" | "lead" | "result";
 
 export default function Quiz() {
+  const navigate = useNavigate();
+
   const [stage, setStage] = useState<Stage>("quiz");
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -26,6 +34,18 @@ export default function Quiz() {
   const [answers, setAnswers] = useState<QuizAnswers>({});
 
   const currentQuestion = quizQuestions[stepIndex];
+
+  // Marca a entrada no quiz — sem isso não dá pra medir quantas
+  // pessoas começam vs. quantas terminam (taxa de conclusão do funil).
+  useEffect(() => {
+    trackEvent("quiz_start");
+  }, []);
+
+  useEffect(() => {
+    if (stage === "result") {
+      trackEvent("result_view");
+    }
+  }, [stage]);
 
   function handleSelect(optionId: string) {
     setAnswers((prev) => ({
@@ -36,6 +56,7 @@ export default function Quiz() {
     if (stepIndex < quizQuestions.length - 1) {
       setStepIndex((prev) => prev + 1);
     } else {
+      trackEvent("quiz_complete");
       setStage("loading");
     }
   }
@@ -59,19 +80,18 @@ export default function Quiz() {
       )}
 
       {stage === "loading" && (
-        <DiagnosisLoading onDone={() => setStage("result")} />
-      )}
-
-      {stage === "result" && (
-        <Result answers={answers} onContinue={() => setStage("lead")} />
+        <DiagnosisLoading onDone={() => setStage("lead")} />
       )}
 
       {stage === "lead" && (
         <LeadCapture
-          onContinue={() => {
-            window.location.href = "/acesso";
-          }}
+          quizAnswers={answers}
+          onContinue={() => setStage("result")}
         />
+      )}
+
+      {stage === "result" && (
+        <Result answers={answers} onContinue={() => navigate("/acesso")} />
       )}
     </main>
   );
